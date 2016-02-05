@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 Generate the residule learning network.
-Author: Yemin Shi
+Author: Yemin Shi, Modified by Li He
 Email: shiyemin@pku.edu.cn
 
 MSRA Paper: http://arxiv.org/pdf/1512.03385v1.pdf
@@ -43,14 +43,6 @@ layer {
   transform_param {
     mirror: true
     crop_size: 224
-    mean_value: 104
-    mean_value: 117
-    mean_value: 123
-  }
-  data_param {
-    source: "../imagenet/ilsvrc12_train_lmdb"
-    batch_size: 8
-    backend: LMDB
   }
 }
 layer {
@@ -62,16 +54,7 @@ layer {
     phase: TEST
   }
   transform_param {
-    mirror: false
     crop_size: 224
-    mean_value: 104
-    mean_value: 117
-    mean_value: 123
-  }
-  data_param {
-    source: "../imagenet/ilsvrc12_val_lmdb"
-    batch_size: 5
-    backend: LMDB
   }
 }'''
     return data_layer_str
@@ -95,6 +78,7 @@ def generate_conv_layer(kernel_size, kernel_num, stride, pad, layer_name, bottom
     pad: %d
     kernel_size: %d
     stride: %d
+    bias_term: false
     weight_filler {
       type: "%s"
     }
