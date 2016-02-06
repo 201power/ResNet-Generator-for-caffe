@@ -2,7 +2,6 @@
 """
 Generate the residule learning network.
 Author: Yemin Shi, Modified by Li He
-Email: shiyemin@pku.edu.cn
 
 MSRA Paper: http://arxiv.org/pdf/1512.03385v1.pdf
 """
@@ -22,7 +21,7 @@ def parse_args():
                         help='Output train_val.prototxt file')
     parser.add_argument('--layer_number', nargs='*',
                         help=('Layer number for each layer stage.'),
-                        default=[3, 8, 36, 3])
+                        default=[2, 8, 36, 3])
     parser.add_argument('-t', '--type', type=int,
                         help=('0 for deploy.prototxt, 1 for train_val.prototxt.'),
                         default=1)
@@ -222,25 +221,26 @@ def generate_train_val():
     network_str += generate_pooling_layer(3, 2, 'MAX', 'pool1', 'conv1', 'pool1')
     '''stage 1'''
     last_top = 'pool'%l
-    network_str += generate_conv_layer(1, 256, 1, 0, 'conv2_b1', last_top, 'conv2_b1')
-    network_str += generate_bn_layer('conv2_b1_bn'%l, 'conv2_b1'%l, 'conv2_b1'%l)
-    network_str += generate_scale_layer('conv2_b1_scale'%l, 'conv2_b1'%l, 'conv2_b1'%l)
+    network_str += generate_conv_layer(1, 256, 1, 0, 'conv2_1r', last_top, 'conv2_1r')
+    network_str += generate_bn_layer('conv2_1r_bn'%l, 'conv2_1r'%l, 'conv2_1r'%l)
+    network_str += generate_scale_layer('conv2_1r_scale'%l, 'conv2_1r'%l, 'conv2_1r'%l)
     
-    network_str += generate_conv_layer(1, 64, 1, 0, 'conv2_b2a'%l, last_top, 'conv2_b2a'%l)
-    network_str += generate_bn_layer('conv2_b2a_bn'%l, 'conv2_b2a'%l, 'conv2_b2a'%l)
-    network_str += generate_activation_layer('conv2_b2a_relu'%l, 'conv2_b2a'%l, 'conv2_b2a'%l, 'ReLU')
-    network_str += generate_scale_layer('conv2_b2a_scale'%l, 'conv2_b2a'%l, 'conv2_b2a'%l)
-    network_str += generate_conv_layer(3, 64, 1, 1, 'conv2_b2b'%l, 'conv2_b2a'%l, 'conv2_b2b'%l)
-    network_str += generate_bn_layer('conv2_b2b_bn'%l, 'conv2_b2b'%l, 'conv2_b2b'%l)
-    network_str += generate_activation_layer('conv2_b2b_relu'%l, 'conv2_b2b'%l, 'conv2_b2b'%l, 'ReLU')
-    network_str += generate_scale_layer('conv2_b2b_scale'%l, 'conv2_b2b'%l, 'conv2_b2b'%l)
-    network_str += generate_conv_layer(1, 256, 1, 0, 'conv2_b2c'%l, 'conv2_b2b'%l, 'conv2_b2c'%l)
-    network_str += generate_bn_layer('conv2_b2c_bn'%l, 'conv2_b2c'%l, 'conv2_b2c'%l)
-    network_str += generate_scale_layer('conv2_b2c_scale'%l, 'conv2_b2c'%l, 'conv2_b2c'%l)
-    network_str += generate_eltwise_layer('conv2_sum'%l, conv2_b1, 'conv2_b2c'%l, 'conv2_sum'%l, 'Eltwise')
-    last_top = 'conv2_sum'%l
-    last_output = 'conv2_sum'%l
-    for l in xrange(1, args.layer_number[0]+1):
+    network_str += generate_conv_layer(1, 64, 1, 0, 'conv2_1a'%l, last_top, 'conv2_1a'%l)
+    network_str += generate_bn_layer('conv2_1a_bn'%l, 'conv2_1a'%l, 'conv2_1a'%l)
+    network_str += generate_activation_layer('conv2_1a_relu'%l, 'conv2_1a'%l, 'conv2_1a'%l, 'ReLU')
+    network_str += generate_scale_layer('conv2_1a_scale'%l, 'conv2_1a'%l, 'conv2_1a'%l)
+    network_str += generate_conv_layer(3, 64, 1, 1, 'conv2_1b'%l, 'conv2_1a'%l, 'conv2_1b'%l)
+    network_str += generate_bn_layer('conv2_1b_bn'%l, 'conv2_1b'%l, 'conv2_1b'%l)
+    network_str += generate_activation_layer('conv2_1b_relu'%l, 'conv2_1b'%l, 'conv2_1b'%l, 'ReLU')
+    network_str += generate_scale_layer('conv2_1b_scale'%l, 'conv2_1b'%l, 'conv2_1b'%l)
+    network_str += generate_conv_layer(1, 256, 1, 0, 'conv2_1c'%l, 'conv2_1b'%l, 'conv2_1c'%l)
+    network_str += generate_bn_layer('conv2_1c_bn'%l, 'conv2_1c'%l, 'conv2_1c'%l)
+    network_str += generate_scale_layer('conv2_1c_scale'%l, 'conv2_1c'%l, 'conv2_1c'%l)
+    network_str += generate_eltwise_layer('conv2_1'%l, 'conv2_r'%l, 'conv2_1c'%l, 'conv2_1'%l)
+    network_str += generate_activation_layer('conv2_1_relu'%l, 'conv2_1'%l, 'conv2_1'%l, 'ReLU')
+    last_top = 'conv2_1'%l
+    last_output = 'conv2_1'%l
+    for l in xrange(2, args.layer_number[0]+1):
         network_str += generate_conv_layer(1, 64, 1, 0, 'conv2_%d_1'%l, last_top, 'conv2_%d_1'%l)
         network_str += generate_bn_layer('conv2_%d_1_bn'%l, 'conv2_%d_1'%l, 'conv2_%d_1'%l)
         network_str += generate_activation_layer('conv2_%d_1_relu'%l, 'conv2_%d_1'%l, 'conv2_%d_1'%l, 'ReLU')
